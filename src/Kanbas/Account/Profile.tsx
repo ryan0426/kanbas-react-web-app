@@ -2,20 +2,33 @@ import { Link } from "react-router-dom";
 export default function Profile() {
   return (
     <div id="wd-profile-screen">
-      <h3>Profile</h3>
-      <input id="wd-username" value="alice" placeholder="username" /><br/>
-      <input id="wd-password" value="123" placeholder="password"
-             type="password" /><br/>
-      <input id="wd-firstname" value="Alice" placeholder="First Name" /><br/>
-      <input id="wd-lastname" value="Wonderland" placeholder="Last Name" /><br/>
-      <input id="wd-dob" value="2000-01-01" type="date" /><br/>
-      <input id="wd-email" value="alice@wonderland" type="email" /><br/>
-      <select id="wd-role">
-        <option value="USER">User</option>
-        <option value="ADMIN">Admin</option>
-        <option value="FACULTY">Faculty</option>
-        <option value="STUDENT">Student</option>
-      </select><br/>
-      <Link to="/Kanbas/Account/Signin" >Sign out</Link>
+
+      <h1>Profile</h1>
+      <input id="wd-username"
+             placeholder="alice"
+             className="form-control mb-2"/>
+      <input id="wd-password"
+             placeholder="123" type="password"
+             className="form-control mb-2"/>
+      <input id="wd-firstname"
+             placeholder="Alice"
+             className="form-control mb-2"/>
+      <input id="wd-lastname"
+             placeholder="Wonderland"
+             className="form-control mb-2"/>
+      <input id="wd-dob"
+             placeholder="mm/dd/yyyy" type="date" 
+             className="form-control mb-2"/>
+      <input id="wd-email"
+             placeholder="alice@wonderland.com" type="email" 
+             className="form-control mb-2"/>
+      <input id="wd-role"
+             placeholder="User"
+             className="form-control mb-2"/>
+
+      <Link id="wd-signin-btn"
+            to="/Kanbas/Account/Profile"
+            className="btn btn-danger w-100">
+            Signout </Link>
     </div>
 );}
