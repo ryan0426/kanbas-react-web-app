@@ -1,35 +1,27 @@
 import "./styles.css"
 import { FaChevronDown } from "react-icons/fa";
+import { Link, useParams } from "react-router-dom";
+import * as db from "../../Database";
 
 export default function AssignmentEditor() {
+    const { aid } = useParams(); 
+    const assignments = db.assignments; 
+    const assignment = assignments.find((assignment) => assignment._id === aid );
+    
     return (
         <div className="container">
             <div id="wd-assignments-editor">
                 <label htmlFor="wd-name"><h5>Assignment Name</h5></label><br />
-                <input id="wd-name" value="A1" className="form-control" /><br />
-
+                <input id="wd-name" value={assignment?.title} className="form-control" /><br />
 
                 <div id="wd-description" className="p-3 border rounded">
                     <p>
                         The assignment is <span className="text-danger">available online</span>
                     </p>
                     <p>
-                        Submit a link to the landing page of your Web application running on Netlify.
+                        {assignment?.description}
                     </p>
-                    <p>
-                        The landing page should include the following:
-                    </p>
-                    <ul>
-                        <li>Your full name and section</li>
-                        <li>Links to each of the lab assignments</li>
-                        <li>
-                            Link to the Kanbas application
-                        </li>
-                        <li>Links to all relevant source code repositories</li>
-                    </ul>
-                    <p>
-                        The Kanbas application should include a link to navigate back to the landing page.
-                    </p>
+                    
                 </div>
 
                 <div className="mt-4">
@@ -38,7 +30,7 @@ export default function AssignmentEditor() {
                             <label htmlFor="wd-points" className="form-label">Points</label>
                         </div>
                         <div className="col-md-10 col-12 d-flex align-items-center position-relative">
-                            <input id="wd-points" value="100" className="form-control" />
+                            <input id="wd-points" value={assignment?.points} className="form-control" />
                             <FaChevronDown
                                 className="position-absolute"
                                 style={{ right: '30px' }}
@@ -134,14 +126,19 @@ export default function AssignmentEditor() {
                                     </div>
                                 </div>
 
+                                <div className="mb-3">
+                                    <label htmlFor="wd-available-from"><b>Due</b></label>
+                                    <input id="wd-available-from" value={assignment?.dueDate} type="date" className="form-control" />
+                                </div>
+
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
                                         <label htmlFor="wd-available-from"><b>Available from</b></label>
-                                        <input id="wd-available-from" value="2024-05-06" type="date" className="form-control" />
+                                        <input id="wd-available-from" value={assignment?.available_from} type="date" className="form-control" />
                                     </div>
                                     <div className="col-md-6 mb-3">
                                         <label htmlFor="wd-available-until"><b>Until</b></label>
-                                        <input id="wd-available-until" value="2024-05-20" type="date" className="form-control" />
+                                        <input id="wd-available-until" value="" type="date" className="form-control" />
                                     </div>
                                 </div>
                             </div>
