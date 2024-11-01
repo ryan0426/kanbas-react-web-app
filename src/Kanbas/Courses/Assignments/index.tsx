@@ -1,16 +1,35 @@
 import { BiSearch, BiDotsVerticalRounded, BiPlus } from "react-icons/bi";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaTrash } from "react-icons/fa";
 import AssignmentControlButtons from "./AssignmentControlButtons";
 import { BsGripVertical, BsFileText } from "react-icons/bs";
-import { Link, useParams } from "react-router-dom"; 
+import { Link, useParams,useNavigate } from "react-router-dom"; 
 import * as db from "../../Database"; 
+import {addAssignment, editAssignment, deleteAssignment, updateAssignment} from "./reducer";
+import { useSelector, useDispatch } from "react-redux";
 export default function Assignments() {
   const { cid } = useParams(); 
-  const assignments = db.assignments; 
-
+  const navigate = useNavigate();
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const dispatch = useDispatch();
   const filteredAssignments = assignments.filter(
-    (assignment) => assignment.course === cid
-  );
+    (assignment:any) => assignment.course === cid);
+
+  console.log(filteredAssignments)
+  const handleAddAssignment = () => {
+    const newAssignmentData = {
+      title: "New Assignment", 
+      description: "New Assignment Description",
+      points: 100,
+      course: cid,
+    };
+    navigate(`/Kanbas/Courses/${cid}/Assignments/new`,{ state: { assignment: newAssignmentData }}); 
+    };
+
+    const handleDeleteAssignment = (assignmentId:any) => () => {
+      if (window.confirm('Are you sure you want to delete this assignment?')) {
+          dispatch(deleteAssignment(assignmentId));
+      }
+  };
     return (
       <div id="wd-assignments">
 
@@ -28,7 +47,7 @@ export default function Assignments() {
             <button className="btn btn-outline-secondary me-2 d-flex align-items-center">
               <BiPlus className="me-2" /> Group
             </button>
-            <button className="btn btn-danger d-flex align-items-center">
+            <button className="btn btn-danger d-flex align-items-center" onClick={handleAddAssignment}>
               <BiPlus className="me-2" /> Assignment
             </button>
           </div>
@@ -43,7 +62,7 @@ export default function Assignments() {
             </div>
             <ul className="wd-lessons list-group rounded-0">
               {filteredAssignments.length > 0 ? (
-                filteredAssignments.map((assignment, index) => (
+                filteredAssignments.map((assignment:any, index:any) => (
                   <li
                     key={assignment._id}
                     className="wd-assignment-list-item d-flex align-items-start p-3 mb-3 border-start border-3 border-success"
@@ -62,6 +81,7 @@ export default function Assignments() {
                       </p>
                       <p className="mb-0">Due May 13 at 11:59pm | 100 pts</p>
                     </div>
+                    <FaTrash className="text-danger me-2 mb-1" onClick={handleDeleteAssignment(assignment._id)} />
                     <FaCheckCircle className="text-success fs-4 me-3" />
                     <BiDotsVerticalRounded className="fs-4" />
                   </li>

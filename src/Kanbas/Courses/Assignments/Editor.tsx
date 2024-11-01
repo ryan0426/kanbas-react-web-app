@@ -1,28 +1,47 @@
 import "./styles.css"
 import { FaChevronDown } from "react-icons/fa";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import * as db from "../../Database";
+import {addAssignment, editAssignment, deleteAssignment, updateAssignment} from "./reducer";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 
 export default function AssignmentEditor() {
-    const { aid } = useParams(); 
-    const assignments = db.assignments; 
-    const assignment = assignments.find((assignment) => assignment._id === aid );
+    const { cid,aid } = useParams(); 
+    const { assignments } = useSelector((state: any) => state.assignmentsReducer); 
+    const location = useLocation();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const assignment = location.state?.assignment || assignments.find((assignment:any) => assignment._id === aid);
+    const handleCancel = () => {
+        navigate(`/Kanbas/Courses/${cid}/Assignments`); 
+    };
+
+    
+
+    const handleSave = () => {
+        console.log(assignment)
+        if (assignments.some((a: { _id: string | undefined; }) => a._id == aid)){
+            dispatch(updateAssignment(assignment));
+        } else {
+            dispatch(addAssignment(assignment));
+        }
+        navigate(`/Kanbas/Courses/${cid}/Assignments`);
+    };
     
     return (
         <div className="container">
             <div id="wd-assignments-editor">
                 <label htmlFor="wd-name"><h5>Assignment Name</h5></label><br />
-                <input id="wd-name" value={assignment?.title} className="form-control" /><br />
+                <input id="wd-name" value={assignment?.title} className="form-control" 
+                onChange={(e) => assignment.title=e.target.value}/><br />
 
-                <div id="wd-description" className="p-3 border rounded">
-                    <p>
-                        The assignment is <span className="text-danger">available online</span>
-                    </p>
-                    <p>
-                        {assignment?.description}
-                    </p>
-                    
-                </div>
+                <textarea
+                    id="wd-description-input"
+                    className="form-control"
+                    defaultValue={assignment?.description} // Use defaultValue for uncontrolled component
+                    onChange={(e) => assignment.description=e.target.value}
+                ></textarea>
 
                 <div className="mt-4">
                     <div className="row">
@@ -30,7 +49,7 @@ export default function AssignmentEditor() {
                             <label htmlFor="wd-points" className="form-label">Points</label>
                         </div>
                         <div className="col-md-10 col-12 d-flex align-items-center position-relative">
-                            <input id="wd-points" value={assignment?.points} className="form-control" />
+                            <input id="wd-points" value={assignment?.points} className="form-control" onChange={(e) => assignment.points=e.target.value}/>
                             <FaChevronDown
                                 className="position-absolute"
                                 style={{ right: '30px' }}
@@ -128,17 +147,20 @@ export default function AssignmentEditor() {
 
                                 <div className="mb-3">
                                     <label htmlFor="wd-available-from"><b>Due</b></label>
-                                    <input id="wd-available-from" value={assignment?.dueDate} type="date" className="form-control" />
+                                    <input id="wd-available-from" value={assignment?.dueDate} type="date" className="form-control" 
+                                    onChange={(e) => assignment.dueDate=e.target.value}/>
                                 </div>
 
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
                                         <label htmlFor="wd-available-from"><b>Available from</b></label>
-                                        <input id="wd-available-from" value={assignment?.available_from} type="date" className="form-control" />
+                                        <input id="wd-available-from" value={assignment?.available_from} type="date" className="form-control" 
+                                        onChange={(e) => assignment.available_from=e.target.value}/>
                                     </div>
                                     <div className="col-md-6 mb-3">
                                         <label htmlFor="wd-available-until"><b>Until</b></label>
-                                        <input id="wd-available-until" value="" type="date" className="form-control" />
+                                        <input id="wd-available-until" value="" type="date" className="form-control" 
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -148,9 +170,9 @@ export default function AssignmentEditor() {
                 </div>
                 <hr />
 
-                <button id="wd-collapse-all" className="btn btn-md btn-secondary me-1 float-end">
+                <button id="wd-collapse-all" className="btn btn-md btn-secondary me-1 float-end" onClick={handleSave}>
                     Save</button>
-                <button id="wd-view-progress" className="btn btn-md btn-danger me-1 float-end">
+                <button id="wd-view-progress" className="btn btn-md btn-danger me-1 float-end" onClick={handleCancel}>
                     Cancel</button>
             </div>
         </div>
