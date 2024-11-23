@@ -4,17 +4,32 @@ import AssignmentControlButtons from "./AssignmentControlButtons";
 import { BsGripVertical, BsFileText } from "react-icons/bs";
 import { Link, useParams,useNavigate } from "react-router-dom"; 
 import * as db from "../../Database"; 
-import {addAssignment, editAssignment, deleteAssignment, updateAssignment} from "./reducer";
+import {setAssignments, addAssignment, editAssignment, deleteAssignment, updateAssignment} from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
+import * as coursesClient from "../client";
+import * as AssignmentClient from "./client";
+import React, { useState, useEffect } from "react";
 export default function Assignments() {
   const { cid } = useParams(); 
   const navigate = useNavigate();
   const { assignments } = useSelector((state: any) => state.assignmentsReducer);
   const dispatch = useDispatch();
-  const filteredAssignments = assignments.filter(
-    (assignment:any) => assignment.course === cid);
+  const fetchAssignments = async () => {
+      const assignments = await coursesClient.findAssignmentsForCourse(cid as string);
+      dispatch(setAssignments(assignments));
+  };
 
-  console.log(filteredAssignments)
+  useEffect(() => {
+      fetchAssignments();
+  }, []);
+
+  const newAssignmentData = {
+    title: "New Assignment",
+    description: "New Assignment Description",
+    points: 100,
+    course: cid,
+  };
+
   const handleAddAssignment = () => {
     const newAssignmentData = {
       title: "New Assignment", 
@@ -25,10 +40,24 @@ export default function Assignments() {
     navigate(`/Kanbas/Courses/${cid}/Assignments/new`,{ state: { assignment: newAssignmentData }}); 
     };
 
-    const handleDeleteAssignment = (assignmentId:any) => () => {
+  // const handleAddAssignment = async () => {
+  //   if (!cid) return;
+  //   const createdAssignment = await coursesClient.createAssignmentForCourse(
+  //     cid,
+  //     newAssignmentData
+  //   );
+  //   dispatch(addAssignment(createdAssignment));
+  //   navigate(`/Kanbas/Courses/${cid}/Assignments`);
+  // };
+
+    
+
+    const handleDeleteAssignment = async (assignmentId: string) => {
       if (window.confirm('Are you sure you want to delete this assignment?')) {
-          dispatch(deleteAssignment(assignmentId));
+        await AssignmentClient.deleteAssignment(assignmentId);
+        dispatch(deleteAssignment(assignmentId));
       }
+    
   };
     return (
       <div id="wd-assignments">
@@ -61,8 +90,8 @@ export default function Assignments() {
               <AssignmentControlButtons/>
             </div>
             <ul className="wd-lessons list-group rounded-0">
-              {filteredAssignments.length > 0 ? (
-                filteredAssignments.map((assignment:any, index:any) => (
+              {assignments.length > 0 ? (
+                assignments.map((assignment:any, index:any) => (
                   <li
                     key={assignment._id}
                     className="wd-assignment-list-item d-flex align-items-start p-3 mb-3 border-start border-3 border-success"
@@ -81,7 +110,7 @@ export default function Assignments() {
                       </p>
                       <p className="mb-0">Due May 13 at 11:59pm | 100 pts</p>
                     </div>
-                    <FaTrash className="text-danger me-2 mb-1" onClick={handleDeleteAssignment(assignment._id)} />
+                    <FaTrash className="text-danger me-2 mb-1" onClick={() => handleDeleteAssignment(assignment._id)} />
                     <FaCheckCircle className="text-success fs-4 me-3" />
                     <BiDotsVerticalRounded className="fs-4" />
                   </li>

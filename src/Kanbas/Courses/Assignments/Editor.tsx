@@ -5,6 +5,8 @@ import * as db from "../../Database";
 import {addAssignment, editAssignment, deleteAssignment, updateAssignment} from "./reducer";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import * as AssignmentClient from "./client";
+import * as coursesClient from "../client";
 
 export default function AssignmentEditor() {
     const { cid,aid } = useParams(); 
@@ -13,18 +15,21 @@ export default function AssignmentEditor() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const assignment = location.state?.assignment || assignments.find((assignment:any) => assignment._id === aid);
+    const [editableAssignment, setEditableAssignment] = useState({ ...assignment });
     const handleCancel = () => {
         navigate(`/Kanbas/Courses/${cid}/Assignments`); 
     };
 
     
 
-    const handleSave = () => {
-        console.log(assignment)
-        if (assignments.some((a: { _id: string | undefined; }) => a._id == aid)){
-            dispatch(updateAssignment(assignment));
+    const handleSave = async () => {
+        if (assignments.find((assignment:any) => assignment._id === aid)) {
+            await AssignmentClient.updateAssignment(editableAssignment);
+            console.log("Assignment updated successfully.");
         } else {
-            dispatch(addAssignment(assignment));
+            if (!cid) return;
+            const createdAssignment = await coursesClient.createAssignmentForCourse(cid, editAssignment);
+            console.log("Assignment created successfully:", createdAssignment);
         }
         navigate(`/Kanbas/Courses/${cid}/Assignments`);
     };
@@ -33,14 +38,14 @@ export default function AssignmentEditor() {
         <div className="container">
             <div id="wd-assignments-editor">
                 <label htmlFor="wd-name"><h5>Assignment Name</h5></label><br />
-                <input id="wd-name" value={assignment?.title} className="form-control" 
-                onChange={(e) => assignment.title=e.target.value}/><br />
+                <input id="wd-name" value={editableAssignment?.title} className="form-control" 
+                onChange={(e) => setEditableAssignment({...editableAssignment, "title": e.target.value})}/><br />
 
                 <textarea
                     id="wd-description-input"
                     className="form-control"
-                    defaultValue={assignment?.description} // Use defaultValue for uncontrolled component
-                    onChange={(e) => assignment.description=e.target.value}
+                    defaultValue={editableAssignment?.description} // Use defaultValue for uncontrolled component
+                    onChange={(e) => setEditableAssignment({...editableAssignment, "description": e.target.value})}
                 ></textarea>
 
                 <div className="mt-4">
@@ -49,7 +54,7 @@ export default function AssignmentEditor() {
                             <label htmlFor="wd-points" className="form-label">Points</label>
                         </div>
                         <div className="col-md-10 col-12 d-flex align-items-center position-relative">
-                            <input id="wd-points" value={assignment?.points} className="form-control" onChange={(e) => assignment.points=e.target.value}/>
+                            <input id="wd-points" value={editableAssignment?.points} className="form-control" onChange={(e) => setEditableAssignment({...editableAssignment, "points": e.target.value})}/>
                             <FaChevronDown
                                 className="position-absolute"
                                 style={{ right: '30px' }}
@@ -147,15 +152,15 @@ export default function AssignmentEditor() {
 
                                 <div className="mb-3">
                                     <label htmlFor="wd-available-from"><b>Due</b></label>
-                                    <input id="wd-available-from" value={assignment?.dueDate} type="date" className="form-control" 
-                                    onChange={(e) => assignment.dueDate=e.target.value}/>
+                                    <input id="wd-available-from" value={editableAssignment?.dueDate} type="date" className="form-control" 
+                                    onChange={(e) => setEditableAssignment({...editableAssignment, "dueDate": e.target.value})}/>
                                 </div>
 
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
                                         <label htmlFor="wd-available-from"><b>Available from</b></label>
-                                        <input id="wd-available-from" value={assignment?.available_from} type="date" className="form-control" 
-                                        onChange={(e) => assignment.available_from=e.target.value}/>
+                                        <input id="wd-available-from" value={editableAssignment?.available_from} type="date" className="form-control" 
+                                        onChange={(e) => setEditableAssignment({...editableAssignment, "available_from": e.target.value})}/>
                                     </div>
                                     <div className="col-md-6 mb-3">
                                         <label htmlFor="wd-available-until"><b>Until</b></label>

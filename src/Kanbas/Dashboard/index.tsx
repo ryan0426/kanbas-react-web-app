@@ -1,26 +1,30 @@
 import { Link } from "react-router-dom";
-import { addEnrollment, removeEnrollment } from "./reducer";
+import { addEnrollment, removeEnrollment, setEnrollments } from "./reducer";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Dashboard(
-    { courses, course, setCourse, addNewCourse, deleteCourse, updateCourse }: {
+    { courses, course, allCourses, setCourse, addNewCourse, deleteCourse, updateCourse, handleEnroll, handleUnenroll }: {
         courses: any[];
         course: any;
+        allCourses: any[];
         setCourse: (course: any) => void;
         addNewCourse: (courseId: string) => void;
         deleteCourse: (course: any) => void;
         updateCourse: () => void;
+        handleEnroll: (courseId: string) => void;
+        handleUnenroll: (courseId: string) => void;
     }) {
     const dispatch = useDispatch();
     const { currentUser } = useSelector((state: any) => state.accountReducer);
-    const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
+
+    useEffect(() => {
+      }, [dispatch]);
+
+    
 
     const [showAllCourses, setShowAllCourses] = useState(false);
-    const courseIdsEnrolled = enrollments
-        .filter((enrollment: any) => enrollment.user === currentUser._id)
-        .map((enrollment: any) => enrollment.course);
-    const coursesToShow = showAllCourses ? courses : courses.filter(course => courseIdsEnrolled.includes(course._id));
+    const visibleCourses = showAllCourses ? allCourses : courses;
 
     function truncateText(text: string, maxLength: number) {
         if (text.length > maxLength) {
@@ -30,6 +34,9 @@ export default function Dashboard(
         return text;
     }
 
+    console.log(courses);
+    console.log(allCourses);
+
     return (
         <div id="wd-dashboard">
             <h1 id="wd-dashboard-title">
@@ -37,7 +44,7 @@ export default function Dashboard(
             </h1>
             <hr />
             <h2 id="wd-dashboard-published">
-                Published Courses ({coursesToShow.length})
+                Published Courses ({visibleCourses.length})
             </h2>
             <hr />
             {currentUser.role === 'STUDENT' && (
@@ -91,8 +98,8 @@ export default function Dashboard(
                 </>)}
             <div id="wd-dashboard-courses" className="row g-4">
                 <div className="row row-cols-1 row-cols-md-5 g-4">
-                    {coursesToShow.map((course) => {
-                        const isEnrolled = courseIdsEnrolled.includes(course._id);
+                    {visibleCourses.map((course) => {
+                        const isEnrolled = courses.some((c) => c._id === course._id);
                         return (
                             <div className="wd-dashboard-course col" style={{ width: "300px" }}>
                                 <div className="card rounded-3 overflow-hidden shadow" style={{ height: "100%", display: 'flex', flexDirection: 'column' }}>
@@ -119,14 +126,14 @@ export default function Dashboard(
                                             isEnrolled ? (
                                                 <button className="btn btn-danger" onClick={(event) => {
                                                     event.preventDefault()
-                                                    dispatch(removeEnrollment({ courseId: course._id, userId: currentUser._id }))
+                                                    handleUnenroll(course._id);
                                                 }}>
                                                     Unenroll
                                                 </button>
                                             ) : (
                                                 <button className="btn btn-success" onClick={(event) => {
                                                     event.preventDefault()
-                                                    dispatch(addEnrollment({ courseId: course._id, userId: currentUser._id }))
+                                                    handleEnroll(course._id);
                                                 }}>
                                                     Enroll
                                                 </button>
