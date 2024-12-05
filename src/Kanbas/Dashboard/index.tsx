@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 
 export default function Dashboard(
-    { courses, course, allCourses, setCourse, addNewCourse, deleteCourse, updateCourse, handleEnroll, handleUnenroll }: {
+    { courses, course, allCourses, setCourse, addNewCourse, deleteCourse, updateCourse, handleEnroll, handleUnenroll, enrolling, setEnrolling,updateEnrollment }: {
         courses: any[];
         course: any;
         allCourses: any[];
@@ -14,6 +14,9 @@ export default function Dashboard(
         updateCourse: () => void;
         handleEnroll: (courseId: string) => void;
         handleUnenroll: (courseId: string) => void;
+        enrolling: boolean; 
+        setEnrolling: (enrolling: boolean) => void;
+        updateEnrollment: (courseId: string, enrolled: boolean) => void
     }) {
     const dispatch = useDispatch();
     const { currentUser } = useSelector((state: any) => state.accountReducer);
@@ -41,6 +44,9 @@ export default function Dashboard(
         <div id="wd-dashboard">
             <h1 id="wd-dashboard-title">
                 Dashboard
+                <button onClick={() => setEnrolling(!enrolling)} className="float-end btn btn-primary" >
+                    {enrolling ? "My Courses" : "All Courses"}
+                </button>
             </h1>
             <hr />
             <h2 id="wd-dashboard-published">
@@ -98,7 +104,7 @@ export default function Dashboard(
                 </>)}
             <div id="wd-dashboard-courses" className="row g-4">
                 <div className="row row-cols-1 row-cols-md-5 g-4">
-                    {visibleCourses.map((course) => {
+                    {courses.map((course) => {
                         const isEnrolled = courses.some((c) => c._id === course._id);
                         return (
                             <div className="wd-dashboard-course col" style={{ width: "300px" }}>
@@ -112,7 +118,17 @@ export default function Dashboard(
                                         />
                                         <div className="card-body" style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                                             <h5 className="wd-dashboard-course-title card-title" style={{ color: 'darkblue' }}>
-                                                {truncateText(course.name, 22)}
+                                            {truncateText(course.name, 22)}
+                                            {enrolling && (
+                                                <button onClick={(event) => {
+                                                        event.preventDefault();
+                                                        updateEnrollment(course._id, !course.enrolled);
+                                                    }}
+                                                
+                                                    className={`btn ${ course.enrolled ? "btn-danger" : "btn-success" } float-end`} >
+                                                    {course.enrolled ? "Unenroll" : "Enroll"}
+                                                </button>
+                                            )}
                                             </h5>
                                             <p className="wd-dashboard-course-title card-text overflow-y-hidden" style={{ flexGrow: 1, color: 'gray', fontSize: '0.85rem', marginTop: '-0.5rem', maxHeight: 100 }}>
                                                 {course.description}
